@@ -1,13 +1,9 @@
 from fastapi import FastAPI
 
+from rest.routers.chat_routes import chat_router
+from rest.routers.conversation_routes import conversation_router
+
 app = FastAPI()
 
-
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
-
-
-@app.get("/hello/{name}")
-async def say_hello(name: str):
-    return {"message": f"Hello {name}"}
+app.include_router(chat_router, prefix="/api/v1")
+app.include_router(conversation_router, prefix="/api/v1")
