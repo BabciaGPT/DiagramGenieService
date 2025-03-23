@@ -2,16 +2,15 @@ from typing import Optional, List
 
 from pydantic import BaseModel, Field
 
+from rest.models.Message import Message
+
 
 class ChatResponse(BaseModel):
     """
     Response model from the chatbot.
     """
 
-    reply: str = Field(..., description="Chatbot's response")
-    uml_diagram: Optional[str] = Field(
-        None, description="Generated UML diagram (e.g., in PlantUML format)"
-    )
     conversation_id: str = Field(
         ..., description="Unique identifier for the conversation"
     )
+    message: Message = Field(..., description="Message from the chatbot")
