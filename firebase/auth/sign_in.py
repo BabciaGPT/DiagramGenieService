@@ -4,8 +4,7 @@ import requests
 
 
 def sign_in_user_firebase(email, password):
-    url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={os.getenv("GOOGLE_WEB_API_KEY")}"
-
+    url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={os.getenv('GOOGLE_WEB_API_KEY')}"
     payload = {"email": email, "password": password, "returnSecureToken": True}
 
     response = requests.post(url, json=payload)
