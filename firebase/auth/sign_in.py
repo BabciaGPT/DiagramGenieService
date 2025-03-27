@@ -12,8 +12,6 @@ def sign_in_user_firebase(email, password):
 
     if response.status_code == 200:
         data = response.json()
-        print("Successfully signed in!")
-        print(f"ID Token: {data['idToken']}")
         return data
     else:
         raise Exception(f"Failed to sign in! {response.text}")
