@@ -13,7 +13,7 @@ from rest.models.UserInfo import UserInfo
 auth_router = APIRouter(prefix="/auth", tags=["Auth"])
 
 
-@auth_router.post("/create-user", response_model=UserCreated)
+@auth_router.post("/createUser", response_model=UserCreated)
 async def create_user(create_user_body: CreateUserRequest):
     try:
         user = create_user_firebase(
@@ -35,7 +35,7 @@ async def create_user(create_user_body: CreateUserRequest):
         )
 
 
-@auth_router.post("/sign-in", response_model=LoginResponse)
+@auth_router.post("/signIn", response_model=LoginResponse)
 async def sign_in(login_body: LoginRequest):
     try:
         response = sign_in_user_firebase(
@@ -46,7 +46,7 @@ async def sign_in(login_body: LoginRequest):
         return {"message": str(e)}
 
 
-@auth_router.get("/get_user", response_model=UserInfo)
+@auth_router.get("/getUser", response_model=UserInfo)
 async def read_current_user(user: dict = Depends(verify_token)):
     return UserInfo(
         username=user["name"],
