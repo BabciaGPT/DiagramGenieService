@@ -4,11 +4,12 @@ import os
 import uuid
 from platform import system
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 
 from ai.client.OpenAiClient import OpenAIClient
 from ai.models.PlantUmlJsonResponse import PlantUmlJsonResponse
 from plantuml_generator.core.generator import PlantUMLGenerator
+from rest.middleware.token_middleware import verify_token
 from rest.models.ChatRequest import ChatRequest
 from rest.models.ChatResponse import ChatResponse
 from rest.models.Message import Message
@@ -19,8 +20,8 @@ client = OpenAIClient()
 generator = PlantUMLGenerator()
 
 
-@chat_router.post("/", response_model=ChatResponse)
-async def chat(request: ChatRequest):
+@chat_router.post("/make", response_model=ChatResponse)
+async def chat(request: ChatRequest, user: dict = Depends(verify_token)):
     try:
         try:
             response = client.ask(
@@ -30,9 +31,7 @@ async def chat(request: ChatRequest):
                 formatoutput=PlantUmlJsonResponse,
             )
         except Exception as e:
-            raise HTTPException(
-                status_code=500, detail="AI service failed. Please try again later."
-            )
+            raise HTTPException(status_code=500, detail=str(e))
 
         try:
             diagram_base64 = generator.generate_from_code(response.plantuml_code)
@@ -49,4 +48,4 @@ async def chat(request: ChatRequest):
         )
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail="An unexpected error occurred.")
+        raise HTTPException(status_code=500, detail=str(e))

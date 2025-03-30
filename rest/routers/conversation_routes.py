@@ -1,9 +1,9 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
+from rest.middleware.token_middleware import verify_token
 from rest.models.Conversation import Conversation
 from rest.models.ConversationRequest import ConversationRequest
 from rest.models.ConversationResponse import ConversationResponse
-from rest.models.ConversationsRequest import ConversationsRequest
 from rest.models.ConversationsResponse import ConversationsResponse
 from rest.models.Message import Message
 from rest.models.MessageType import MessageType
@@ -12,15 +12,16 @@ conversation_router = APIRouter(prefix="/conversations", tags=["Conversations"])
 
 
 @conversation_router.post("/fetchAllForUser", response_model=ConversationsResponse)
-async def fetch_all_for_user(conversation_request: ConversationsRequest):
+async def fetch_all_for_user(user: dict = Depends(verify_token)):
     return ConversationsResponse(
-        user_id=conversation_request.user_id,
         conversations_titles=["sample 1", "sample 2"],
     )
 
 
 @conversation_router.post("/fetchConversation", response_model=ConversationResponse)
-async def fetch_conversation(conversation_request: ConversationRequest):
+async def fetch_conversation(
+    conversation_request: ConversationRequest, user: dict = Depends(verify_token)
+):
     return ConversationResponse(
         conversation_id="test_uuid",
         conversation=Conversation(
