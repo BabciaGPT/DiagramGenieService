@@ -11,7 +11,6 @@ class ChatRequest(BaseModel):
     - message: The incoming message from the user.
     """
 
-    user_id: str = Field(..., description="Unique identifier for the user")
     message: str = Field(..., description="Incoming message from the user")
     conversation_id: Optional[str] = Field(
         None, description="Optional session identifier for the conversation"
