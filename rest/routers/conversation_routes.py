@@ -14,7 +14,10 @@ conversation_router = APIRouter(prefix="/conversations", tags=["Conversations"])
 @conversation_router.post("/fetchAllForUser", response_model=ConversationsResponse)
 async def fetch_all_for_user(user: dict = Depends(verify_token)):
     return ConversationsResponse(
-        conversations_titles=["sample 1", "sample 2"],
+        conversations={
+            "test_uuid": "sample title",
+            "test_uuid_2": "sample title 2",
+        }
     )
 
 
