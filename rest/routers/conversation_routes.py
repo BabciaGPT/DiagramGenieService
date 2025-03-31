@@ -34,7 +34,7 @@ async def fetch_conversation(request: ConversationRequest):
 
 
 @conversation_router.delete(
-    "/fetchConversation",
+    "/deleteConversation",
     response_model=bool,
     dependencies=[Depends(verify_token)],
 )
