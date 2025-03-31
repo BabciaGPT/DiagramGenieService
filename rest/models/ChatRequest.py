@@ -11,6 +11,6 @@ class ChatRequest(BaseModel):
     """
 
     message: str = Field(..., description="Incoming message from the user")
-    conversation_id: Optional[str] = Field(
-        None, description="Optional session identifier for the conversation"
+    conversation_id: str = Field(
+        ..., description="Optional session identifier for the conversation"
     )
