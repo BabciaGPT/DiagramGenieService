@@ -22,7 +22,7 @@ firebase = ConversationsRepo()
 
 
 @chat_router.post("/create", response_model=ConversationResponse)
-async def chat(request: ChatCreateRequest, user: dict = Depends(verify_token)):
+async def chat_create(request: ChatCreateRequest, user: dict = Depends(verify_token)):
     try:
 
         response = client.ask(
