@@ -1,3 +1,4 @@
+import base64
 import json
 import os
 from datetime import datetime
@@ -10,6 +11,7 @@ from firebase.repositories.ConversationsRepo import ConversationsRepo
 from plantuml_generator.core.generator import PlantUMLGenerator
 from rest.middleware.token_middleware import verify_token
 from rest.models.ChatCreateRequest import ChatCreateRequest
+from rest.models.ChatRequest import ChatRequest
 from rest.models.Conversation import Conversation
 from rest.models.ConversationResponse import ConversationResponse
 from rest.models.Message import Message
@@ -76,6 +78,64 @@ async def chat_create(request: ChatCreateRequest, user: dict = Depends(verify_to
                 ],
             ),
         )
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@chat_router.put("/put", response_model=Message, dependencies=[Depends(verify_token)])
+async def chat_put(request: ChatRequest):
+    try:
+        past_messages = [
+            {
+                "role": message["message_type"],
+                "content": f"PlantUML code: {message['code']}"
+                f"\nMessage: {message['message']}",
+            }
+            for message in firebase.fetch_messages(request.conversation_id)
+        ]
+
+        response = client.ask(
+            os.getenv("OPENAI_MODEL"),
+            system_prompt="Hello",
+            user_messages=past_messages
+            + [{"role": "user", "content": request.message}],
+            formatoutput=PlantUmlJsonResponse,
+        )
+
+        ai_response = PlantUmlJsonResponse(**json.loads(response))
+        diagram_base64 = None
+
+        if ai_response.plantuml_code:
+            try:
+                diagram_base64 = generator.generate_from_code(ai_response.plantuml_code)
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=str(e))
+
+        user_msg = {
+            "message": request.message,
+            "diagram_base64": None,
+            "code": None,
+            "message_type": MessageType.USER.value,
+            "timestamp": datetime.now().isoformat(),
+        }
+
+        system_msg = {
+            "message": ai_response.description,
+            "diagram_base64": base64.b64encode(diagram_base64).decode("utf-8"),
+            "code": ai_response.plantuml_code,
+            "message_type": MessageType.SYSTEM.value,
+            "timestamp": datetime.now().isoformat(),
+        }
+
+        updated = firebase.update_with_messages(
+            request.conversation_id,
+            [user_msg, system_msg],
+        )
+        if updated:
+            return Message(**system_msg)
+        else:
+            raise HTTPException(status_code=500, detail="Error while saving")
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
