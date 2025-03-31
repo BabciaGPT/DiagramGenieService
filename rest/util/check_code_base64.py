@@ -9,5 +9,4 @@ def check_code_base64(ai_response, generator):
             )
             return base64.b64encode(diagram_base64).decode("utf-8")
         except Exception as e:
-            print(str(e))
             return None
