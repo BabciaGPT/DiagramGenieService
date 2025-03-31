@@ -1,4 +1,3 @@
-import base64
 import json
 import os
 from datetime import datetime
@@ -16,6 +15,7 @@ from rest.models.Conversation import Conversation
 from rest.models.ConversationResponse import ConversationResponse
 from rest.models.Message import Message
 from rest.models.MessageType import MessageType
+from rest.util.check_code_base64 import check_code_base64
 
 chat_router = APIRouter(prefix="/chat", tags=["Chat"])
 client = OpenAIClient()
@@ -35,13 +35,7 @@ async def chat_create(request: ChatCreateRequest, user: dict = Depends(verify_to
         )
 
         ai_response = PlantUmlJsonResponse(**json.loads(response))
-        diagram_base64 = None
-
-        if ai_response.plantuml_code:
-            try:
-                diagram_base64 = generator.generate_from_code(ai_response.plantuml_code)
-            except Exception as e:
-                raise HTTPException(status_code=500, detail=str(e))
+        diagram = check_code_base64(ai_response, generator)
 
         saved = firebase.create_conversation(
             [
@@ -54,9 +48,9 @@ async def chat_create(request: ChatCreateRequest, user: dict = Depends(verify_to
                 },
                 {
                     "message": ai_response.description,
-                    "diagram_base64": diagram_base64,
+                    "diagram_base64": diagram,
                     "code": ai_response.plantuml_code,
-                    "message_type": MessageType.USER.value,
+                    "message_type": MessageType.SYSTEM.value,
                     "timestamp": datetime.now().isoformat(),
                 },
             ],
@@ -71,6 +65,7 @@ async def chat_create(request: ChatCreateRequest, user: dict = Depends(verify_to
                     Message(
                         message=message["message"],
                         message_type=message["message_type"],
+                        diagram_base64=message["diagram_base64"],
                         timestamp=message["timestamp"],
                         code=message["code"],
                     )
@@ -104,13 +99,7 @@ async def chat_put(request: ChatRequest):
         )
 
         ai_response = PlantUmlJsonResponse(**json.loads(response))
-        diagram_base64 = None
-
-        if ai_response.plantuml_code:
-            try:
-                diagram_base64 = generator.generate_from_code(ai_response.plantuml_code)
-            except Exception as e:
-                raise HTTPException(status_code=500, detail=str(e))
+        diagram = check_code_base64(ai_response, generator)
 
         user_msg = {
             "message": request.message,
@@ -122,7 +111,7 @@ async def chat_put(request: ChatRequest):
 
         system_msg = {
             "message": ai_response.description,
-            "diagram_base64": base64.b64encode(diagram_base64).decode("utf-8"),
+            "diagram_base64": diagram,
             "code": ai_response.plantuml_code,
             "message_type": MessageType.SYSTEM.value,
             "timestamp": datetime.now().isoformat(),
