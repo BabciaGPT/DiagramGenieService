@@ -82,15 +82,14 @@ async def chat_create(request: ChatCreateRequest, user: dict = Depends(verify_to
 @chat_router.put("/put", response_model=Message, dependencies=[Depends(verify_token)])
 async def chat_put(request: ChatRequest):
     try:
+        _, conversation = firebase.fetch_user_conversation(request.conversation_id)
         past_messages = [
             {
                 "role": message["message_type"],
                 "content": f"PlantUML code: {message['code']}"
                 f"\nMessage: {message['message']}",
             }
-            for message in firebase.fetch_user_conversation(request.conversation_id)[
-                "messages"
-            ]
+            for message in conversation["messages"]
         ]
 
         response = client.ask(

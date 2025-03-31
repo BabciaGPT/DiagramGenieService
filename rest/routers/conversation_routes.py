@@ -23,21 +23,11 @@ async def fetch_all_for_user(user: dict = Depends(verify_token)):
 
 @conversation_router.post("/fetchConversation", response_model=ConversationResponse)
 async def fetch_conversation(
-    conversation_request: ConversationRequest, user: dict = Depends(verify_token)
+    request: ConversationRequest, user: dict = Depends(verify_token)
 ):
+    id, conversation = conversations_repo.fetch_user_conversation(
+        request.conversation_id
+    )
     return ConversationResponse(
-        conversation_id="test_uuid",
-        conversation=Conversation(
-            title="sample title",
-            messages=[
-                Message(
-                    message="sample message",
-                    message_type=MessageType.USER,
-                ),
-                Message(
-                    message="sample message",
-                    message_type=MessageType.SYSTEM,
-                ),
-            ],
-        ),
+        conversation_id=id, conversation=Conversation(**conversation)
     )

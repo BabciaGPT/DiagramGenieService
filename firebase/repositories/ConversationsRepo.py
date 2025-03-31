@@ -37,7 +37,7 @@ class ConversationsRepo:
         if not doc.exists:
             return None
 
-        return doc.to_dict()
+        return doc.id, doc.to_dict()
 
     def get_conversations_by_user(self, user_id):
         query = self.collection.where(
