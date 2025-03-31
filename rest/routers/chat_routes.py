@@ -55,6 +55,7 @@ async def chat_create(request: ChatCreateRequest, user: dict = Depends(verify_to
                 },
             ],
             user["user_id"],
+            ai_response.title,
         )
 
         return ConversationResponse(
