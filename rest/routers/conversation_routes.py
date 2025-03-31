@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends
 
+from firebase.repositories.ConversationsRepo import ConversationsRepo
 from rest.middleware.token_middleware import verify_token
 from rest.models.Conversation import Conversation
 from rest.models.ConversationRequest import ConversationRequest
@@ -9,16 +10,15 @@ from rest.models.Message import Message
 from rest.models.MessageType import MessageType
 
 conversation_router = APIRouter(prefix="/conversations", tags=["Conversations"])
+conversations_repo = ConversationsRepo()
 
 
-@conversation_router.post("/fetchAllForUser", response_model=ConversationsResponse)
+@conversation_router.get("/fetchAllForUser", response_model=ConversationsResponse)
 async def fetch_all_for_user(user: dict = Depends(verify_token)):
-    return ConversationsResponse(
-        conversations={
-            "test_uuid": "sample title",
-            "test_uuid_2": "sample title 2",
-        }
+    conversations = conversations_repo.get_conversations_by_user(
+        user["user_id"],
     )
+    return ConversationsResponse(conversations=conversations)
 
 
 @conversation_router.post("/fetchConversation", response_model=ConversationResponse)
