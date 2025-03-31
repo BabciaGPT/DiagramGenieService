@@ -1,7 +1,7 @@
-from typing import Dict
+from typing import Dict, List
 
 from pydantic import BaseModel
 
 
 class ConversationsResponse(BaseModel):
-    conversations: Dict[str, str]
+    conversations: List[Dict[str, str]]

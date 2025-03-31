@@ -1,43 +1,43 @@
 from fastapi import APIRouter, Depends
 
+from firebase.repositories.ConversationsRepo import ConversationsRepo
 from rest.middleware.token_middleware import verify_token
 from rest.models.Conversation import Conversation
 from rest.models.ConversationRequest import ConversationRequest
 from rest.models.ConversationResponse import ConversationResponse
 from rest.models.ConversationsResponse import ConversationsResponse
-from rest.models.Message import Message
-from rest.models.MessageType import MessageType
 
 conversation_router = APIRouter(prefix="/conversations", tags=["Conversations"])
+conversations_repo = ConversationsRepo()
 
 
-@conversation_router.post("/fetchAllForUser", response_model=ConversationsResponse)
+@conversation_router.get("/fetchAllForUser", response_model=ConversationsResponse)
 async def fetch_all_for_user(user: dict = Depends(verify_token)):
-    return ConversationsResponse(
-        conversations={
-            "test_uuid": "sample title",
-            "test_uuid_2": "sample title 2",
-        }
+    conversations = conversations_repo.get_conversations_by_user(
+        user["user_id"],
     )
+    return ConversationsResponse(conversations=conversations)
 
 
-@conversation_router.post("/fetchConversation", response_model=ConversationResponse)
-async def fetch_conversation(
-    conversation_request: ConversationRequest, user: dict = Depends(verify_token)
-):
+@conversation_router.post(
+    "/fetchConversation",
+    response_model=ConversationResponse,
+    dependencies=[Depends(verify_token)],
+)
+async def fetch_conversation(request: ConversationRequest):
+    conversation_id, conversation = conversations_repo.fetch_user_conversation(
+        request.conversation_id
+    )
     return ConversationResponse(
-        conversation_id="test_uuid",
-        conversation=Conversation(
-            title="sample title",
-            messages=[
-                Message(
-                    message="sample message",
-                    message_type=MessageType.USER,
-                ),
-                Message(
-                    message="sample message",
-                    message_type=MessageType.SYSTEM,
-                ),
-            ],
-        ),
+        conversation_id=conversation_id, conversation=Conversation(**conversation)
     )
+
+
+@conversation_router.delete(
+    "/deleteConversation",
+    response_model=bool,
+    dependencies=[Depends(verify_token)],
+)
+async def delete_conversation(request: ConversationRequest):
+    result = conversations_repo.delete_conversation(request.conversation_id)
+    return result
