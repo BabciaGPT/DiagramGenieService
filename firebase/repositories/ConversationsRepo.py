@@ -53,3 +53,11 @@ class ConversationsRepo:
             )
 
         return conversations
+
+    def delete_conversation(self, doc_id):
+        try:
+            doc_ref = self.collection.document(doc_id)
+            doc_ref.delete()
+            return True
+        except Exception:
+            return False

@@ -31,3 +31,13 @@ async def fetch_conversation(request: ConversationRequest):
     return ConversationResponse(
         conversation_id=conversation_id, conversation=Conversation(**conversation)
     )
+
+
+@conversation_router.delete(
+    "/fetchConversation",
+    response_model=bool,
+    dependencies=[Depends(verify_token)],
+)
+async def delete_conversation(request: ConversationRequest):
+    result = conversations_repo.delete_conversation(request.conversation_id)
+    return result
