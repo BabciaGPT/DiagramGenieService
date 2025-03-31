@@ -25,9 +25,9 @@ async def fetch_all_for_user(user: dict = Depends(verify_token)):
     dependencies=[Depends(verify_token)],
 )
 async def fetch_conversation(request: ConversationRequest):
-    id, conversation = conversations_repo.fetch_user_conversation(
+    conversation_id, conversation = conversations_repo.fetch_user_conversation(
         request.conversation_id
     )
     return ConversationResponse(
-        conversation_id=id, conversation=Conversation(**conversation)
+        conversation_id=conversation_id, conversation=Conversation(**conversation)
     )
