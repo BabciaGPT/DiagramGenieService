@@ -10,9 +10,9 @@ class ConversationsRepo:
         self.db = FirestoreClient.get_client()
         self.collection = self.db.collection("conversations")
 
-    def create_conversation(self, messages, user_id):
+    def create_conversation(self, messages, user_id, title):
         _, document_ref = self.collection.add(
-            {"user_id": user_id, "messages": messages}
+            {"user_id": user_id, "title": title, "messages": messages}
         )
         document_snapshot = document_ref.get()
 
@@ -38,3 +38,18 @@ class ConversationsRepo:
             return None
 
         return doc.to_dict()["messages"]
+
+    def get_conversations_by_user(self, user_id):
+        query = self.collection.where(
+            filter=firestore.FieldFilter("user_id", "==", user_id)
+        )
+        docs = query.stream()
+
+        conversations = []
+        for doc in docs:
+            doc_data = doc.to_dict()
+            conversations.append(
+                {"id": doc.id, "title": doc_data.get("title", "Untitled")}
+            )
+
+        return conversations
