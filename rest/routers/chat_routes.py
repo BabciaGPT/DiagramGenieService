@@ -88,7 +88,9 @@ async def chat_put(request: ChatRequest):
                 "content": f"PlantUML code: {message['code']}"
                 f"\nMessage: {message['message']}",
             }
-            for message in firebase.fetch_messages(request.conversation_id)
+            for message in firebase.fetch_user_conversation(request.conversation_id)[
+                "messages"
+            ]
         ]
 
         response = client.ask(

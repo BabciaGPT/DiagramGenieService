@@ -30,14 +30,14 @@ class ConversationsRepo:
 
         return doc_ref.update({"messages": firestore.ArrayUnion(pair_messages)})
 
-    def fetch_messages(self, conversation_id):
+    def fetch_user_conversation(self, conversation_id):
         doc_ref = self.db.collection("conversations").document(conversation_id)
         doc = doc_ref.get()
 
         if not doc.exists:
             return None
 
-        return doc.to_dict()["messages"]
+        return doc.to_dict()
 
     def get_conversations_by_user(self, user_id):
         query = self.collection.where(
