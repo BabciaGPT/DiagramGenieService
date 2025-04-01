@@ -20,7 +20,6 @@ async def create_user(create_user_body: CreateUserRequest):
         user = create_user_firebase(
             email=create_user_body.email,
             password=create_user_body.password,
-            display_name=create_user_body.username,
         )
 
         if not user:
