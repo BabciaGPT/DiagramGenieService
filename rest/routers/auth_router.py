@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from firebase_admin.exceptions import FirebaseError
 from starlette import status
 
 from firebase.auth.create_user import create_user_firebase
@@ -28,6 +29,11 @@ async def create_user(create_user_body: CreateUserRequest):
             )
 
         return UserCreated(message="User created successfully", uid=user.uid)
+
+    except FirebaseError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
     except Exception as e:
         raise HTTPException(
