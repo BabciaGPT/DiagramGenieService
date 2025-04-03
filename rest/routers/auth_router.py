@@ -47,8 +47,12 @@ async def sign_in(login_body: LoginRequest):
             email=login_body.email, password=login_body.password
         )
         return LoginResponse(token=response["idToken"])
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except Exception as e:
-        return {"message": str(e)}
+        return HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
+        )
 
 
 @auth_router.get("/getUser", response_model=UserInfo)
