@@ -10,7 +10,8 @@ def sign_in_user_firebase(email, password):
     response = requests.post(url, json=payload)
 
     if response.status_code == 200:
-        data = response.json()
-        return data
+        return response.json()
+    elif response.status_code >= 400:
+        raise ValueError(response.json()["error"]["message"])
     else:
-        raise Exception(f"Failed to sign in! {response.text}")
+        raise Exception(response.json()["error"]["message"])
