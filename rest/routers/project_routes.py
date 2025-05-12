@@ -28,7 +28,6 @@ async def fetch_all_for_user(user: dict = Depends(verify_token)):
 )
 async def fetch_project(request: ProjectRequest):
     project_id, project = projects_repo.fetch_user_project(request.project_id)
-    print(project)
     return ProjectResponse(project_id=project_id, project=Project(**project))
 
 
